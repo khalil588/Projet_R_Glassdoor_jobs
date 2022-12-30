@@ -1,0 +1,318 @@
+---
+title: "Projet Atelier statistique avec R"
+author: "Khalil_Mekni"
+date: "2022-12-27"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# L'objectif du projet :
+
+Comme des futures Datascientistes, il existe des centaines des questions que nous nous questionne chaque jour. Pour ce là, je vais travaillé sur une dataset des jobs concernant notre domaine de la part de l'entreprise du GLassdor.com
+
+## Glassdor.com :
+
+Glassdoor est un site Internet où les employés actuels et anciens employés d'entreprises évaluent leur environnement de travail de manière anonyme
+
+# DataSet :
+
+1)  Glassdoor est un site Internet où les employés actuels et anciens employés d'entreprises évaluent leur environnement de travail de manière anonyme
+
+-   Notre Dataset contient deux fichiers :
+
+-   eda_data.csv : Cet ensemble de données contient les offres d'emploi de Glassdoor.com de 2017 à 2018. Cet ensemble de données comprend des caractéristiques comme le titre du poste, l'estimation du salaire, la description de poste, la cote, le nom de l'entreprise, l'emplacement, le siège social, la taille, la société fondée, le type de propriété, l'industrie, le secteur, les revenus, les concurrents, et dresse une liste des caractéristiques les plus importantes de cet ensemble de données. , les salaires horaires minima et maxima,, avgsalary,, numcomp,,sdesc_len Si vous cherchez un emploi dans le domaine de la science des données, alors c'est l'ensemble de données que vous pouvez explorer! Les informationes concernant les entreprises sont un peu faussifs c'est pourquoi nous allons faire le matching entre ce fichier et le fichier du glassdor jobs
+
+-   X : Identificateur unique de l'offre d'emploi (numérique)
+
+-   job_state : L'état où se trouve le travail (chaîne)\n
+
+-   same_state : Indicateur binaire indiquant si l'emploi est dans le même état que la personne qui regarde l'emploi (chaîne)\n
+
+-   âge : l'âge de la personne qui examine l'emploi (numérique)
+
+-   python_yn : Indicateur binaire indiquant si la personne qui regarde le travail connaît Python (String)
+
+-   R_yn : Indicateur binaire indiquant si la personne qui regarde le poste connaît R (chaîne de caractères)
+
+-   spark : Un indicateur binaire de si la personne qui regarde le travail sait Spark (String)
+
+-   aws : un indicateur binaire permettant de savoir si la personne qui regarde le travail connaît AWS (chaîne)
+
+-   excel : Indicateur binaire indiquant si la personne qui regarde le travail connaît Excel (chaîne)
+
+-   job_simp : Titre du poste simplifié (chaîne de caractères)
+
+-   seniority : L'ancienneté du poste (chaîne)
+
+-   desc_len : La durée de la description de poste (numérique)
+
+-   num_comp: Le nombre de concurrents pour le poste (numérique)
+
+1.A) Description statistique du fichier eda_data :
+
+```{r echo =FALSE}
+eda_data =read.csv('DataSet/eda_data.csv')
+summary(eda_data)
+print(sapply(eda_data, class))
+```
+
+1.B) Quelques ligne du fichier eda_data :
+
+```{r echo=FALSE}
+eda_data
+```
+
+2)  glassdoor_jobs.txt La dataset des emplois de Glassdoor contient les offres d'emploi de Glassdoor.com de 2017 à 2018. Cet ensemble de données comprend des caractéristiques comme le titre du poste, l'estimation du salaire, la description de poste, la cote, le nom de l'entreprise, l'emplacement, le siège social, la taille, la société fondée, le type de propriété, l'industrie, le secteur, les revenus, les concurrents, et dresse une liste des caractéristiques les plus importantes de cet ensemble de données. , les salaires horaires minima et maxima,, avgsalary,, numcomp,,sdesc_len Si vous cherchez un emploi dans le domaine de la science des données, alors c'est l'ensemble de données que vous pouvez explorer!
+
+2.A) Description statistique du fichier glassdoor_jobs :
+
+```{r echo=FALSE}
+glassdoor_jobs =read.csv("DataSet/glassdoor.txt", comment.char="#")
+summary(glassdoor_jobs)
+
+```
+
+2.B) Quelques ligne du fichier glassdoor_jobs :
+
+```{r echo=FALSE}
+
+head(glassdoor_jobs)
+print(sapply(glassdoor_jobs, class))
+
+```
+
+## Le Preprocessing
+
+-   Dans le Preprocessing, il existe plusieurs étape à faire lequel :
+    -   Data quality assessment
+    -   Data cleaning
+    -   Data transformation
+    -   Data reduction
+
+1)  Data Quality Assessment :
+
+1.A) Data Quality Assessment pour le fichier eda_data :
+
+RQ :
+
+-   l'utilité du champ est trouvé entre 1 et 3
+
+-   1 : n'est pas utile
+
+-   2 : utile mais demande une manipulation
+
+-   3 : utile
+
+    -- Taux de manipulation est trouvé aussi entre 1 et 3
+
+-   1 : ne demande pas de manipulation
+
+-   2 : demande un peu de manipulation
+
+-   3 : demande beaucoup de manipulation
+
+| Nom du champ | Description du champ                                                                                         | Utilité du champ | Taux de manipulation |
+|----------------|-------------------------|----------------|----------------|
+| X            | Identificateur unique de l'offre d'emploi (numérique)                                                        | 3                | 1                    |
+| job_state    | L'état où se trouve le travail (chaîne)                                                                      | 3                | 1                    |
+| same_state   | Indicateur binaire indiquant si l'emploi est dans le même état que la personne qui regarde l'emploi (chaîne) | 1                | 1                    |
+| Age          | l'âge de la personne qui examine l'emploi (numérique)                                                        | 3                | 1                    |
+| python_yn    | Indicateur binaire indiquant si la personne qui regarde le travail connaît Python (String)                   | 3                | 1                    |
+| R_yn         | Indicateur binaire indiquant si la personne qui regarde le poste connaît R (chaîne de caractères)            | 3                | 1                    |
+| spark        | Un indicateur binaire de si la personne qui regarde le travail sait Spark (String)                           | 1                | 1                    |
+| aws          | Un indicateur binaire permettant de savoir si la personne qui regarde le travail connaît AWS (chaîne)        | 1                | 1                    |
+| excel        | Indicateur binaire indiquant si la personne qui regarde le travail connaît Excel (chaîne)                    | 1                | 1                    |
+| job_simp     | Titre du poste simplifié (chaîne de caractères)                                                              | 3                | 1                    |
+| seniority    | L'ancienneté du poste (chaîne)                                                                               | 3                | 1                    |
+| desc_len     | La durée de la description de poste (numérique)                                                              | 1                | 1                    |
+| num_comp     | Le nombre de concurrents pour le poste (numérique)                                                           | 1                | 1                    |
+|              |                                                                                                              |                  |                      |
+
+1.) 1.B) Data Quality Assessment pour le fichier glassdoor_jobs :
+
+RQ :
+
+-   l'utilité du champ est trouvé entre 1 et 3
+
+-   1 : n'est pas utile
+
+-   2 : utile mais demande une manipulation
+
+-   3 : utile
+
+    -- Taux de manipulation est trouvé aussi entre 1 et 3
+
+-   1 : ne demande pas de manipulation
+
+-   2 : demande un peu de manipulation
+
+-   3 : demande beaucoup de manipulation
+
+| Nom du champ    | Description du champ                                       | Utilité du champ | Taux de manipulation |
+|---------------|---------------------------|---------------|---------------|
+| X               | l'identificateur unique de chaque job                      | 3                | 1                    |
+| Job Title       | le titre de chaque job                                     | 3                | 1                    |
+| Salary Estimate | l'estimation du chaque salaire par intervalle              | 2                | 2                    |
+| Job Description | Description profondue du chaque offre d'emploi             | 1                | 1                    |
+| Rating          | le rating de chaque emploi                                 | 3                | 1                    |
+| Company Name    | le nom du chaque entreprise                                | 3                | 1                    |
+| Location        | le local du chaque entreprise qui a posté l'offre d'emploi | 3                | 1                    |
+| Headquarter     | Le local de chaque siège des entreprises                   | 3                | 1                    |
+| Size            | le taille de l'entreprise                                  | 3                | 1                    |
+| Founded         | Date de lancement de l'entreprise                          | 3                | 1                    |
+
+2)  Data Cleaning et transformation des données :
+
+2.A) Data cleaning du fichier eda_data et transformation de ses données :
+
+2.A.1) supprimer les lignes nuls d'eda_data:
+
+```{r}
+library(tidyr)
+eda_data %>% drop_na()
+```
+
+2.A.2) Nous souhaitons travaillé sur les datascientists donc notre étape suivante et d'extracter les offres d'emplois des data scientistes seulement
+
+```{r }
+eda_data_cleaned = eda_data[eda_data$job_simp=='data scientist',]
+eda_data_cleaned
+```
+
+2.A.3) Après le cleaning du dataset nous devons maintenant choisir les colonnes que nous allons travaillés avec elles :
+
+NB : Nous allons choisir nos colonnes basant sur le data quality assessment du dataframe eda_data_cleaned :
+
+```{r echo =FALSE}
+library(dplyr)
+eda_data_chosen = select(eda_data_cleaned, X,Size,min_salary,max_salary,avg_salary,company_txt,job_state,same_state,age,python_yn,R_yn,job_simp)
+eda_data_chosen
+```
+
+2.A.4) Conclusion :
+
+Maintenant , Après le data cleaning du eda_data nous devons faire le memes étapes avec le fichier glassdoor jobs
+
+2.B) Data cleaning du fichier Glassdoor Jobs :
+
+2.B.1) supprimer les lignes nuls d'eda_data:
+
+```{r echo = FALSE}
+glassdoor_jobs %>% drop_na()
+names(glassdoor_jobs)
+```
+
+2.B.2) Le fichier glassdoor_jobs est un fichier txt. Alors tous ses champs vont etre des champs de types caractères, mais il existe des champs du type numeric ou double donc l'étape suivante est de transformer ses champs là
+
+```{r echo = FALSE}
+glassdoor_jobs$Rating <- as.double(as.character(glassdoor_jobs$Rating))
+glassdoor_jobs$X <- as.integer(as.character(glassdoor_jobs$X))
+glassdoor_jobs$Founded <- as.integer(as.character(glassdoor_jobs$Founded))
+library(stringr)
+Loc2= str_sub(glassdoor_jobs$Location,-2,-1)
+glassdoor_jobs_cleaned = cbind(glassdoor_jobs,Loc2)
+head(glassdoor_jobs_cleaned)
+```
+
+2.B.3) Choisir les colonnes nécessaires :
+
+```{r echo = FALSE}
+glassdoor_jobs_chosen = select(glassdoor_jobs_cleaned,X,Job.Title,Salary.Estimate,Rating,Company.Name,Location,Headquarters,Founded,Industry,Sector,Revenue,Loc2)
+glassdoor_jobs_chosen
+```
+
+2.B.4) Conclusion :
+
+Après la manipulation des données du fichier glassdoor_jobs nous nous devons faire le matching entre les deux fichiers
+
+2.C) Matching entre les deux ensembles des données :
+
+```{r}
+new_data_frame = merge(eda_data_chosen,glassdoor_jobs_chosen,by.x='X',by.y = 'X', all.x = T, no.dup = T)
+new_data_frame
+```
+
+3) Data reduction :
+
+Notre ensemble de données après les manipuations nécessaires a diminiué sa taille donc nous nous sommes dans le besoin de faire le data reduction, nous pouvons voir ci-dessous le taille de notre nouveau dataset :
+
+```{r echo = FALSE}
+nrow(new_data_frame)
+
+```
+
+4) La visualisation des données :
+
+Après la manipulation de notre jeu de données , nous sommes maintenant capables une série des plots :
+
+-   Les minimumes salaires par pays
+
+-   Les maximumes salaires par pays
+
+-   les salaires moyennes par secteurs
+
+-   la différence des salaire entre les personnes qui connait le langage python ou non
+
+-   la différence des salaire entre les personnes qui connait le langage R ou non
+
+4.A) Les salaires minimale par pays :
+
+```{r}
+library(ggplot2)
+ggplot(data=new_data_frame, aes(x=Loc2,y = min_salary)) +
+  geom_point()+
+  labs(title="Les salaire minimumes par pays",x="Les pays", y = "en $")
+```
+
+4.B) Les salaires maximales par pays :
+
+```{r}
+library(ggplot2)
+ggplot(data=new_data_frame, aes(x=Loc2,y = max_salary)) +
+  geom_point()+
+  labs(title="Les salaire maximales par pays",x="Les pays", y = "en $")
+```
+
+4.C) : Les salaires moyennes par secteur :
+
+```{r}
+library(ggplot2)
+p <- ggplot(data=new_data_frame, aes( x=avg_salary,y=Loc2)) +
+  geom_bar(stat = "identity")
+p
+
+```
+
+4.D) la différence des salaire entre les personnes qui connait la langage python ou non:
+
+```{r}
+library(gapminder)
+library(patchwork)
+p <- ggplot(data=new_data_frame, aes( x=avg_salary,fill = python_yn )) 
+p <- p +geom_area(aes(y = avg_salary))
+p <- p +theme_minimal()
+p
+  
+
+
+```
+
+4.D) la différence des salaire entre les personnes qui connait la langage R ou non:
+
+```{r}
+p <- ggplot(data=new_data_frame, aes( x=avg_salary,fill = R_yn )) 
+p <- p +geom_area(aes(y = avg_salary))
+p <- p +theme_minimal()
+p
+
+```
+
+
+##Conclusion 
+Les salaires des datascientistes sont très important et diffèrent avec une marge importante aussi. Nous avons trouvé d'après nos graphes que pour être payer mieux tu dois viser un secteur spécialisé dans l'informatique.
